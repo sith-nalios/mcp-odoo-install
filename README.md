@@ -1,6 +1,6 @@
 # Installation MCP Server Odoo
 
-Scripts d'installation du serveur MCP `mcp-server-odoo` pour Claude Desktop et Claude Code.
+Scripts d'installation du serveur MCP `mcp-server-odoo` pour Claude Desktop.
 
 ## Windows
 
@@ -8,7 +8,7 @@ Scripts d'installation du serveur MCP `mcp-server-odoo` pour Claude Desktop et C
 2. Colle cette commande dans la fenêtre PowerShell (pas dans cmd !) :
 
 ```powershell
-irm https://raw.githubusercontent.com/AMA-Nalios/mcp-odoo-install/main/install-mcp-odoo-windows.ps1 | iex
+irm https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp-odoo-windows.ps1 | iex
 ```
 
 > **Important :** ne pas télécharger et double-cliquer le fichier `.ps1` — coller la commande dans PowerShell comme indiqué ci-dessus.
@@ -18,7 +18,7 @@ irm https://raw.githubusercontent.com/AMA-Nalios/mcp-odoo-install/main/install-m
 Si l'erreur pywin32 (`os error 32`) revient à chaque redémarrage de Claude Desktop et que l'utilisateur n'a pas les droits admin sur son poste, utiliser ce script à la place : il installe `mcp-server-odoo` une seule fois de façon persistante (`uv tool install`) au lieu de le réinstaller à chaque lancement de Claude Desktop.
 
 ```powershell
-irm https://raw.githubusercontent.com/AMA-Nalios/mcp-odoo-install/main/install-mcp-odoo-windows-persistent.ps1 | iex
+irm https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp-odoo-windows-persistent.ps1 | iex
 ```
 
 > Pour changer de version de `mcp-server-odoo` plus tard, il faut relancer ce script plutôt que de simplement modifier la config.
@@ -28,7 +28,7 @@ irm https://raw.githubusercontent.com/AMA-Nalios/mcp-odoo-install/main/install-m
 Ouvre un Terminal et colle :
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/AMA-Nalios/mcp-odoo-install/main/install-mcp-odoo-mac.sh | bash
+curl -LsSf https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp-odoo-mac.sh | bash
 ```
 
 ## Installation manuelle (Windows)
@@ -62,8 +62,12 @@ uv python install 3.12
 
 ### 4. Configurer le MCP manuellement
 
-Ouvre le fichier de config Claude Desktop :
-`C:\Users\TonNom\AppData\Roaming\Claude\claude_desktop_config.json`
+Ouvre le fichier de config Claude Desktop : dans l'app, **Paramètres > Développeur > Modifier la configuration** (c'est le seul moyen fiable de trouver le bon fichier, son emplacement dépend de la version installée).
+
+Emplacements possibles, par ordre de priorité du script :
+- `%LOCALAPPDATA%\Claude-Data\claude_pzs8sxrjxfjjc\claude_desktop_config.json` (versions récentes)
+- `%LOCALAPPDATA%\Packages\Claude_*\LocalCache\Roaming\Claude\claude_desktop_config.json` (Microsoft Store)
+- `%APPDATA%\Claude\claude_desktop_config.json` (installeur classique)
 
 Ajoute le bloc suivant dans la section `mcpServers` (en remplaçant les valeurs) :
 
@@ -95,6 +99,13 @@ Ajoute le bloc suivant dans la section `mcpServers` (en remplaçant les valeurs)
 
 - Installe `uv`/`uvx` si nécessaire
 - Demande l'URL Odoo, la base de données, l'utilisateur et la clé API
-- Configure le serveur MCP dans Claude Desktop et Claude Code
+- Détecte le `claude_desktop_config.json` réellement utilisé par Claude Desktop (cf. emplacements ci-dessus), en fait une sauvegarde `.bak`, puis y ajoute le serveur MCP sans toucher aux autres
+- Affiche à la fin le fichier modifié et la liste des serveurs MCP qu'il contient
 
-Après l'installation, redémarrer Claude Desktop et Claude Code.
+Après l'installation, redémarrer Claude Desktop.
+
+## Si le MCP n'apparaît pas dans Claude
+
+1. Compare le fichier affiché par le script (`Claude Desktop mis a jour : ...`) avec celui ouvert par **Paramètres > Développeur > Modifier la configuration**. S'ils diffèrent, signale le chemin réel à l'équipe.
+2. Si le script indique que le JSON existant n'est pas valide, corrige-le (la sauvegarde est dans `claude_desktop_config.json.bak`) puis relance.
+3. Redémarre complètement Claude Desktop (le quitter depuis la zone de notification, pas seulement fermer la fenêtre).

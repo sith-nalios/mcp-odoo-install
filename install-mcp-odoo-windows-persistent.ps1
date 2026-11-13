@@ -15,7 +15,7 @@
 # relancer ce script (ou "uv tool install mcp-server-odoo==X.Y.Z --force") au lieu
 # de simplement changer le pin dans la config.
 #
-# Usage : irm https://raw.githubusercontent.com/AMA-Nalios/mcp-odoo-install/main/install-mcp-odoo-windows-persistent.ps1 | iex
+# Usage : irm https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp-odoo-windows-persistent.ps1 | iex
 # Usage (test de la generation JSON, sans toucher a la vraie config) : .\install-mcp-odoo-windows-persistent.ps1 -Test
 
 param([switch]$Test)
@@ -24,19 +24,26 @@ param([switch]$Test)
 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
 function Find-ClaudeDesktopConfig {
-    # Installeur classique
-    if (Test-Path "$env:APPDATA\Claude") {
-        return "$env:APPDATA\Claude\claude_desktop_config.json"
+    $name = "claude_desktop_config.json"
+
+    # 1. Nouvel emplacement : %LOCALAPPDATA%\Claude-Data\<package>\... (profondeur variable, on cherche le fichier)
+    $dataRoot = "$env:LOCALAPPDATA\Claude-Data"
+    if (Test-Path $dataRoot) {
+        $f = Get-ChildItem $dataRoot -Filter $name -Recurse -Depth 5 -ErrorAction SilentlyContinue |
+             Sort-Object LastWriteTime -Descending | Select-Object -First 1
+        if ($f) { return $f.FullName }
     }
-    # Microsoft Store (Claude_pzs8sxrjxfjjc ou variante)
-    $pkg = Get-ChildItem "$env:LOCALAPPDATA\Packages" -Filter "Claude_*" -ErrorAction SilentlyContinue |
-           Select-Object -First 1
-    if ($pkg) {
-        $msPath = "$($pkg.FullName)\LocalCache\Roaming\Claude"
-        if (Test-Path $msPath) {
-            return "$msPath\claude_desktop_config.json"
-        }
+
+    # 2. Microsoft Store : %LOCALAPPDATA%\Packages\Claude_*\LocalCache\Roaming\Claude
+    $pkgs = Get-ChildItem "$env:LOCALAPPDATA\Packages" -Filter "Claude_*" -ErrorAction SilentlyContinue
+    foreach ($pkg in $pkgs) {
+        $dir = "$($pkg.FullName)\LocalCache\Roaming\Claude"
+        if (Test-Path $dir) { return "$dir\$name" }
     }
+
+    # 3. Installeur classique
+    if (Test-Path "$env:APPDATA\Claude") { return "$env:APPDATA\Claude\$name" }
+
     return $null
 }
 
@@ -138,8 +145,12 @@ function Update-Config {
     $raw = (Get-Content $ConfigPath -Raw -ErrorAction SilentlyContinue) -as [string]
     if ([string]::IsNullOrWhiteSpace($raw)) { $raw = '{}' }
 
+    if ($raw.Trim() -ne '{}') { Copy-Item $ConfigPath "$ConfigPath.bak" -Force }
     try { $config = $raw | ConvertFrom-Json }
-    catch { $config = [PSCustomObject]@{} }
+    catch {
+        Write-Host "Erreur : $ConfigPath n'est pas un JSON valide, aucune modification (sauvegarde : $ConfigPath.bak). Corrige-le puis relance." -ForegroundColor Red
+        return
+    }
 
     if ($null -eq $config -or $config -isnot [PSCustomObject]) { $config = [PSCustomObject]@{} }
 
@@ -185,7 +196,9 @@ function Update-Config {
     }
 
     Write-Utf8NoBom -Path $ConfigPath -Content $json
+    $check = (Get-Content $ConfigPath -Raw | ConvertFrom-Json).mcpServers.PSObject.Properties.Name -join ", "
     Write-Host "$Label mis a jour : $ConfigPath"
+    Write-Host "Serveurs MCP presents dans ce fichier : $check" -ForegroundColor Green
 }
 
 function Test-ConfigGeneration {

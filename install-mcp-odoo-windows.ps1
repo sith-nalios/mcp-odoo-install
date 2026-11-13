@@ -1,8 +1,8 @@
 # Installation du serveur MCP Odoo (mcp-server-odoo) pour Claude Desktop
-# Usage : irm https://raw.githubusercontent.com/AMA-Nalios/mcp-odoo-install/main/install-mcp-odoo-windows.ps1 | iex
+# Usage : irm https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp-odoo-windows.ps1 | iex
 # Usage (test de la generation JSON, sans toucher a la vraie config) : .\install-mcp-odoo-windows.ps1 -Test
 # Usage (URL/DB pre-remplies pour un client donne, seuls user + cle API sont demandes) :
-#   $env:ODOO_URL="https://client.odoo.com"; $env:ODOO_DB="client-db"; irm https://raw.githubusercontent.com/AMA-Nalios/mcp-odoo-install/main/install-mcp-odoo-windows.ps1 | iex
+#   $env:ODOO_URL="https://client.odoo.com"; $env:ODOO_DB="client-db"; irm https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp-odoo-windows.ps1 | iex
 #
 # Notes fiabilite Windows :
 #  - UV_LINK_MODE=copy : evite le verrou de fichier (os error 32) lors de l'install de pywin32
