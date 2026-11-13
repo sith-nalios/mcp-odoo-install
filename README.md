@@ -8,7 +8,7 @@ Scripts d'installation du serveur MCP `mcp-server-odoo` pour Claude Desktop.
 2. Colle cette commande dans la fenêtre PowerShell (pas dans cmd !) :
 
 ```powershell
-irm https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp-odoo-windows.ps1 | iex
+irm https://raw.githubusercontent.com/sith-nalios/mcp-odoo-install/main/install-mcp-odoo-windows.ps1 | iex
 ```
 
 > **Important :** ne pas télécharger et double-cliquer le fichier `.ps1` — coller la commande dans PowerShell comme indiqué ci-dessus.
@@ -18,7 +18,7 @@ irm https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp
 Si l'erreur pywin32 (`os error 32`) revient à chaque redémarrage de Claude Desktop et que l'utilisateur n'a pas les droits admin sur son poste, utiliser ce script à la place : il installe `mcp-server-odoo` une seule fois de façon persistante (`uv tool install`) au lieu de le réinstaller à chaque lancement de Claude Desktop.
 
 ```powershell
-irm https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp-odoo-windows-persistent.ps1 | iex
+irm https://raw.githubusercontent.com/sith-nalios/mcp-odoo-install/main/install-mcp-odoo-windows-persistent.ps1 | iex
 ```
 
 > Pour changer de version de `mcp-server-odoo` plus tard, il faut relancer ce script plutôt que de simplement modifier la config.
@@ -28,7 +28,7 @@ irm https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp
 Ouvre un Terminal et colle :
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp-odoo-mac.sh | bash
+curl -LsSf https://raw.githubusercontent.com/sith-nalios/mcp-odoo-install/main/install-mcp-odoo-mac.sh | bash
 ```
 
 ## Installation manuelle (Windows)

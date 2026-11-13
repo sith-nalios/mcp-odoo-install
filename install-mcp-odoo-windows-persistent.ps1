@@ -15,7 +15,7 @@
 # relancer ce script (ou "uv tool install mcp-server-odoo==X.Y.Z --force") au lieu
 # de simplement changer le pin dans la config.
 #
-# Usage : irm https://raw.githubusercontent.com/MyNalios/mcp-odoo-install/main/install-mcp-odoo-windows-persistent.ps1 | iex
+# Usage : irm https://raw.githubusercontent.com/sith-nalios/mcp-odoo-install/main/install-mcp-odoo-windows-persistent.ps1 | iex
 # Usage (test de la generation JSON, sans toucher a la vraie config) : .\install-mcp-odoo-windows-persistent.ps1 -Test
 
 param([switch]$Test)
