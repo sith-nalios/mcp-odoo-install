@@ -108,4 +108,5 @@ Après l'installation, redémarrer Claude Desktop.
 
 1. Compare le fichier affiché par le script (`Claude Desktop mis a jour : ...`) avec celui ouvert par **Paramètres > Développeur > Modifier la configuration**. S'ils diffèrent, signale le chemin réel à l'équipe.
 2. Si le script indique que le JSON existant n'est pas valide, corrige-le (la sauvegarde est dans `claude_desktop_config.json.bak`) puis relance.
-3. Redémarre complètement Claude Desktop (le quitter depuis la zone de notification, pas seulement fermer la fenêtre).
+3. Si le MCP démarre puis se déconnecte avec une erreur de redirection (`HTTP 303`) ou « JSON-2 », l'instance est probablement en Odoo 17/18 : l'API JSON-2 n'existe qu'à partir d'Odoo 19. Le script détecte la version et ajoute `"ODOO_RPC_TRANSPORT": "xmlrpc"` dans la config quand elle est inférieure à 19. Sur une config créée avant cette détection, ajoute cette ligne à la main dans le bloc `env` du MCP.
+4. Redémarre complètement Claude Desktop (le quitter depuis la zone de notification, pas seulement fermer la fenêtre).

@@ -135,6 +135,18 @@ function Write-Utf8NoBom {
     [System.IO.File]::WriteAllText($Path, $Content, $utf8NoBom)
 }
 
+# Detecte la version majeure d'Odoo (endpoint public, sans authentification).
+# Odoo < 19 n'a pas l'API JSON-2 : mcp-server-odoo doit alors utiliser XML-RPC.
+# Renvoie $null si la detection echoue (on laisse alors le mode "auto" par defaut).
+function Get-OdooMajorVersion {
+    param([string]$Url)
+    try {
+        $r = Invoke-RestMethod -Uri ($Url.TrimEnd('/') + "/web/webclient/version_info") -Method Post `
+             -ContentType "application/json" -Body '{"jsonrpc":"2.0","method":"call","params":{}}' -TimeoutSec 15
+        return [int]$r.result.server_version_info[0]
+    } catch { return $null }
+}
+
 function Update-Config {
     param([string]$ConfigPath, [string]$Label)
 
@@ -173,6 +185,10 @@ function Update-Config {
             ODOO_MCP_DEFAULT_LIMIT = "100"
             ODOO_MCP_MAX_LIMIT     = "1000"
         }
+    }
+
+    if ($script:odooMajor -and $script:odooMajor -lt 19) {
+        Add-Member -InputObject $entry.env -MemberType NoteProperty -Name "ODOO_RPC_TRANSPORT" -Value "xmlrpc"
     }
 
     if ($null -ne $config.mcpServers.PSObject.Properties[$mcpName]) {
@@ -329,6 +345,14 @@ function Main {
     Write-Host ""
 
     # 3. Claude Desktop
+    $script:odooMajor = Get-OdooMajorVersion -Url $odooUrl
+    if ($odooMajor -and $odooMajor -lt 19) {
+        Write-Host "Odoo $odooMajor detecte : ajout de ODOO_RPC_TRANSPORT=xmlrpc (l'API JSON-2 n'existe qu'a partir d'Odoo 19)." -ForegroundColor Yellow
+    } elseif ($odooMajor) {
+        Write-Host "Odoo $odooMajor detecte : protocole automatique (JSON-2)."
+    } else {
+        Write-Host "Version d'Odoo non detectee, protocole automatique conserve." -ForegroundColor Yellow
+    }
     Update-Config -ConfigPath $configPath -Label "Claude Desktop"
 
     Write-Host ""
