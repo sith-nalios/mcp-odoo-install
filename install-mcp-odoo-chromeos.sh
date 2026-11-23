@@ -69,7 +69,7 @@ if [ ! -f "$CONFIG_PATH" ]; then
 fi
 
 python3 - "$CONFIG_PATH" "$UVX_PATH" "$ODOO_URL" "$ODOO_DB" "$ODOO_USER" "$ODOO_API_KEY" "$MCP_NAME" <<'EOF'
-import json, sys
+import json, sys, urllib.request
 
 config_path, uvx_path, url, db, user, api_key, mcp_name = sys.argv[1:8]
 
@@ -91,6 +91,26 @@ config["mcpServers"][mcp_name] = {
         "ODOO_MCP_MAX_LIMIT": "1000",
     },
 }
+
+major = None
+try:
+    req = urllib.request.Request(
+        url.rstrip("/") + "/web/webclient/version_info",
+        data=b'{"jsonrpc":"2.0","method":"call","params":{}}',
+        headers={"Content-Type": "application/json"},
+    )
+    with urllib.request.urlopen(req, timeout=15) as r:
+        major = int(json.load(r)["result"]["server_version_info"][0])
+except Exception:
+    pass
+
+if major is None:
+    print("Version d'Odoo non detectee, protocole automatique conserve.")
+elif major < 19:
+    config["mcpServers"][mcp_name]["env"]["ODOO_RPC_TRANSPORT"] = "xmlrpc"
+    print(f"Odoo {major} detecte : ajout de ODOO_RPC_TRANSPORT=xmlrpc (l'API JSON-2 n'existe qu'a partir d'Odoo 19).")
+else:
+    print(f"Odoo {major} detecte : protocole automatique (JSON-2).")
 
 with open(config_path, "w") as f:
     json.dump(config, f, indent=2)
